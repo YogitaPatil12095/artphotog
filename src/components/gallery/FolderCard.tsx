@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Folder } from '@/types/database'
+import LazyImage from './LazyImage'
 
 interface FolderCardProps {
   folder: Folder
@@ -29,11 +30,9 @@ export default function FolderCard({ folder, colorIndex, imageCount }: FolderCar
         <div className="relative rounded-b-lg rounded-tr-lg overflow-hidden shadow-folder group-hover:shadow-folder-hover transition-shadow duration-300" style={{ backgroundColor: color.bg }}>
           <div className="relative w-full aspect-[4/3] overflow-hidden">
             {folder.cover_image_url ? (
-              <img
+              <LazyImage
                 src={folder.cover_image_url}
                 alt={folder.title}
-                loading="lazy"
-                decoding="async"
                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               />
             ) : (

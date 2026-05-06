@@ -4,6 +4,7 @@ import Masonry from 'react-masonry-css'
 import type { Image as GalleryImage } from '@/types/database'
 import { getFilterStyle } from '@/lib/filters'
 import { X, ChevronLeft, ChevronRight } from 'lucide-react'
+import LazyImage from './LazyImage'
 
 interface GalleryGridProps {
   images: GalleryImage[]
@@ -42,11 +43,9 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
               onClick={() => openLightbox(index)}
             >
               <div className="relative w-full overflow-hidden rounded-xl">
-                <img
+                <LazyImage
                   src={image.image_url}
                   alt={image.caption || `Image ${index + 1}`}
-                  loading="lazy"
-                  decoding="async"
                   className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-500"
                   style={filterStyle}
                 />
