@@ -1,0 +1,109 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --charcoal: #3B3735;
+    --cream: #D8D1BF;
+    --dusty-pink: #D8B7B3;
+    --soft-blue: #B7C8CF;
+    --off-white: #F4F0E8;
+    --muted-text: #2F2F2F;
+    --warm-brown: #8B7355;
+    --light-cream: #EDE8DC;
+    --folder-shadow: #C4BAA6;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  ::selection {
+    background: #D8B7B3;
+    color: #2F2F2F;
+  }
+}
+
+@layer components {
+  .folder-card {
+    position: relative;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .folder-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(59, 55, 53, 0.3);
+  }
+
+  .masonry-grid {
+    display: flex;
+    margin-left: -8px;
+    width: auto;
+  }
+
+  .masonry-grid-column {
+    padding-left: 8px;
+    background-clip: padding-box;
+  }
+
+  .masonry-grid-column > div {
+    margin-bottom: 8px;
+  }
+
+  .lightbox-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(59, 55, 53, 0.95);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--charcoal);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--warm-brown);
+    border-radius: 3px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--cream);
+  }
+
+  .admin-nav-item {
+    @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-mono transition-all duration-150;
+  }
+
+  .drag-handle {
+    cursor: grab;
+  }
+
+  .drag-handle:active {
+    cursor: grabbing;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}
