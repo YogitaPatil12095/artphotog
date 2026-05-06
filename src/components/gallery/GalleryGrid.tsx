@@ -45,6 +45,8 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
                 <img
                   src={image.image_url}
                   alt={image.caption || `Image ${index + 1}`}
+                  loading="lazy"
+                  decoding="async"
                   className="w-full h-auto object-cover group-hover:scale-[1.02] transition-transform duration-500"
                   style={filterStyle}
                 />
@@ -89,6 +91,8 @@ export default function GalleryGrid({ images }: GalleryGridProps) {
               <img
                 src={currentImage.image_url}
                 alt={currentImage.caption || 'Gallery image'}
+                loading="eager"
+                decoding="async"
                 className="max-h-[80vh] w-auto h-auto object-contain rounded-sm shadow-2xl"
                 style={getFilterStyle(currentImage.filter_name)}
               />
