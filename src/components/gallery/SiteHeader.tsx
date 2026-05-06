@@ -1,6 +1,9 @@
 import { Link } from 'react-router-dom'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function SiteHeader() {
+  const { user } = useAuth()
+
   return (
     <header className="border-b border-cream/10 px-6 py-5">
       <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -17,13 +20,21 @@ export default function SiteHeader() {
           </span>
         </Link>
 
-        <nav className="flex items-center gap-6">
-          <Link
-            to="/admin"
-            className="font-mono text-xs tracking-widest uppercase text-cream/30 hover:text-cream/60 transition-colors"
-          >
-            Admin ↗
-          </Link>
+        <nav className="flex items-center gap-5">
+          {user ? (
+            <Link to="/dashboard" className="font-mono text-xs tracking-widest uppercase text-cream/50 hover:text-cream transition-colors">
+              My Folders
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" className="font-mono text-xs tracking-widest uppercase text-cream/40 hover:text-cream/70 transition-colors">
+                Sign In
+              </Link>
+              <Link to="/signup" className="font-mono text-xs tracking-widest uppercase bg-cream text-charcoal px-3 py-1.5 rounded-md hover:bg-off-white transition-colors">
+                Sign Up
+              </Link>
+            </>
+          )}
         </nav>
       </div>
     </header>

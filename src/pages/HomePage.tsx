@@ -12,26 +12,29 @@ export default function HomePage() {
     supabase
       .from('folders')
       .select('*')
-      .eq('is_public', true)
+      .in('access_mode', ['public', 'access_public'])
       .order('sort_order', { ascending: true })
       .then(({ data }) => {
-        setFolders(data || [])
+        setFolders((data as Folder[]) || [])
         setLoading(false)
       })
   }, [])
 
   return (
-    <div className="min-h-screen bg-charcoal">
+    <div className="min-h-screen bg-charcoal flex flex-col">
       <SiteHeader />
-      <main className="max-w-6xl mx-auto px-6 py-16">
+
+      <main className="flex-1 max-w-6xl mx-auto w-full px-6 py-16">
         <div className="mb-16 max-w-2xl">
-          <p className="font-mono text-xs tracking-[0.2em] uppercase text-warm-brown mb-4">Personal Archive</p>
+          <p className="font-mono text-xs tracking-[0.2em] uppercase text-warm-brown mb-4">
+            Shared Archive
+          </p>
           <h1 className="font-display text-4xl md:text-5xl text-off-white leading-tight mb-6">
-            A collection of<br />
-            <em className="text-cream">moments & stories</em>
+            A place for<br />
+            <em className="text-cream">shared moments</em>
           </h1>
           <p className="text-cream/60 text-sm leading-relaxed font-sans">
-            Each folder holds a chapter. Browse through the archive, open what calls to you.
+            Create folders, set who can view and contribute. Open a folder to anyone — or keep it just for you.
           </p>
         </div>
 
@@ -41,15 +44,17 @@ export default function HomePage() {
           </div>
         ) : folders.length === 0 ? (
           <div className="text-center py-24 text-cream/40">
-            <p className="font-mono text-sm tracking-widest uppercase">Nothing here yet</p>
+            <p className="font-mono text-sm tracking-widest uppercase">No public folders yet</p>
           </div>
         ) : (
           <FolderGrid folders={folders} />
         )}
       </main>
 
-      <footer className="border-t border-cream/10 mt-24 py-8 text-center">
-        <p className="font-mono text-xs text-cream/30 tracking-widest uppercase">Crony — Personal Archive</p>
+      <footer className="border-t border-cream/10 py-8 text-center">
+        <p className="font-mono text-xs text-cream/30 tracking-widest uppercase">
+          Crony — Made by Yogita Patil
+        </p>
       </footer>
     </div>
   )

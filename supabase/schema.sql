@@ -1,9 +1,8 @@
 -- =============================================
--- FOLIO GALLERY - Supabase Database Setup
+-- CRONY - Database Setup
 -- Run this in your Supabase SQL Editor
 -- =============================================
 
--- Enable UUID extension
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- =============================================
@@ -13,12 +12,18 @@ CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 -- Folders table
 CREATE TABLE folders (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  owner_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   title TEXT NOT NULL,
   slug TEXT NOT NULL UNIQUE,
   description TEXT,
   cover_image_url TEXT,
   sort_order INTEGER NOT NULL DEFAULT 0,
-  is_public BOOLEAN NOT NULL DEFAULT false,
+  -- access_mode:
+  --   private        = only owner sees + uploads
+  --   public         = everyone views, only owner uploads
+  --   access_private = only owner sees, any logged-in user can upload
+  --   access_public  = everyone views, any logged-in user can upload
+  access_mode TEXT NOT NULL DEFAULT 'private' CHECK (access_mode IN ('private','public','access_private','access_public')),
   date_from DATE,
   date_to DATE,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -29,6 +34,7 @@ CREATE TABLE folders (
 CREATE TABLE images (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   folder_id UUID NOT NULL REFERENCES folders(id) ON DELETE CASCADE,
+  uploaded_by UUID REFERENCES auth.users(id) ON DELETE SET NULL,
   image_url TEXT NOT NULL,
   caption TEXT,
   filter_name TEXT,
@@ -40,9 +46,10 @@ CREATE TABLE images (
 -- INDEXES
 -- =============================================
 
+CREATE INDEX idx_folders_owner ON folders(owner_id);
 CREATE INDEX idx_folders_slug ON folders(slug);
 CREATE INDEX idx_folders_sort_order ON folders(sort_order);
-CREATE INDEX idx_folders_is_public ON folders(is_public);
+CREATE INDEX idx_folders_access_mode ON folders(access_mode);
 CREATE INDEX idx_images_folder_id ON images(folder_id);
 CREATE INDEX idx_images_sort_order ON images(sort_order);
 
@@ -53,35 +60,73 @@ CREATE INDEX idx_images_sort_order ON images(sort_order);
 ALTER TABLE folders ENABLE ROW LEVEL SECURITY;
 ALTER TABLE images ENABLE ROW LEVEL SECURITY;
 
--- Public can read public folders
-CREATE POLICY "Public can read public folders"
+-- SELECT: public + access_public folders visible to all; private + access_private only to owner
+CREATE POLICY "folders_select"
   ON folders FOR SELECT
-  USING (is_public = true);
+  USING (
+    access_mode IN ('public', 'access_public')
+    OR owner_id = auth.uid()
+  );
 
--- Authenticated users (admin) can do everything
-CREATE POLICY "Authenticated can manage folders"
-  ON folders FOR ALL
+-- INSERT: any authenticated user can create a folder
+CREATE POLICY "folders_insert"
+  ON folders FOR INSERT
   TO authenticated
-  USING (true)
-  WITH CHECK (true);
+  WITH CHECK (owner_id = auth.uid());
 
--- Public can read images in public folders
-CREATE POLICY "Public can read images in public folders"
+-- UPDATE/DELETE: only owner
+CREATE POLICY "folders_update"
+  ON folders FOR UPDATE
+  TO authenticated
+  USING (owner_id = auth.uid());
+
+CREATE POLICY "folders_delete"
+  ON folders FOR DELETE
+  TO authenticated
+  USING (owner_id = auth.uid());
+
+-- Images SELECT: visible if folder is visible
+CREATE POLICY "images_select"
   ON images FOR SELECT
   USING (
     EXISTS (
-      SELECT 1 FROM folders
-      WHERE folders.id = images.folder_id
-      AND folders.is_public = true
+      SELECT 1 FROM folders f
+      WHERE f.id = images.folder_id
+      AND (f.access_mode IN ('public', 'access_public') OR f.owner_id = auth.uid())
     )
   );
 
--- Authenticated can manage images
-CREATE POLICY "Authenticated can manage images"
-  ON images FOR ALL
+-- Images INSERT: owner always can; others can if access_private or access_public
+CREATE POLICY "images_insert"
+  ON images FOR INSERT
   TO authenticated
-  USING (true)
-  WITH CHECK (true);
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM folders f
+      WHERE f.id = folder_id
+      AND (
+        f.owner_id = auth.uid()
+        OR f.access_mode IN ('access_private', 'access_public')
+      )
+    )
+  );
+
+-- Images UPDATE/DELETE: uploader or folder owner
+CREATE POLICY "images_update"
+  ON images FOR UPDATE
+  TO authenticated
+  USING (
+    uploaded_by = auth.uid()
+    OR EXISTS (SELECT 1 FROM folders f WHERE f.id = folder_id AND f.owner_id = auth.uid())
+  );
+
+CREATE POLICY "images_delete"
+  ON images FOR DELETE
+  TO authenticated
+  USING (
+    uploaded_by = auth.uid()
+    OR EXISTS (SELECT 1 FROM folders f WHERE f.id = folder_id AND f.owner_id = auth.uid())
+  );
 
 -- =============================================
 -- STORAGE

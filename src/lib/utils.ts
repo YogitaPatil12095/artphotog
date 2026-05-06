@@ -1,4 +1,5 @@
 import imageCompression from 'browser-image-compression'
+import { supabase } from '@/lib/supabase'
 
 export async function compressImage(file: File): Promise<File> {
   const options = {
@@ -26,4 +27,9 @@ export function slugify(text: string): string {
 
 export function cn(...classes: (string | undefined | null | false)[]): string {
   return classes.filter(Boolean).join(' ')
+}
+
+export function getPublicImageUrl(path: string) {
+  const { data } = supabase.storage.from('gallery').getPublicUrl(path)
+  return data.publicUrl
 }
