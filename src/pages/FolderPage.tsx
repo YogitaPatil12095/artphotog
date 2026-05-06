@@ -65,7 +65,7 @@ export default function FolderPage() {
     setShowUpload(true)
   }
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': [] }, multiple: true, noClick: !showUpload })
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': [], 'image/heic': [], 'image/heif': [] }, multiple: true, noClick: !showUpload })
 
   const handleUpload = async () => {
     if (!previews.length || !user || !folder) return

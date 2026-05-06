@@ -159,7 +159,7 @@ export default function DashboardFolderDetailPage() {
     setPreviews(prev => [...prev, ...files.map(file => ({ file, url: URL.createObjectURL(file), filter: 'none' as FilterName, caption: '' }))])
   }, [])
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': [] }, multiple: true })
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop, accept: { 'image/*': [], 'image/heic': [], 'image/heif': [] }, multiple: true })
 
   const handleUpload = async () => {
     if (!previews.length || !user) return
